@@ -1,7 +1,8 @@
  # GitHub Nodejs CI
 name: nodejs
 
-on: ['pull_request']
+on:
+ push:
 
 jobs:
   build:

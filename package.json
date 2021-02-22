@@ -1,24 +1,22 @@
 {
-  "name": "@makerdao/multicall",
-  "version": "0.12.0",
+  "name": "batch-multicall",
+  "version": "0.13.0",
   "description": "A blockchain state management library for dapps.",
-  "contributors": [
-    "Michael Elliot <mike@makerdao.com>",
-    "Joshua Levine <joshua@makerdao.com>",
-    "Lawrence Wang <lawrence@makerdao.com>"
-  ],
   "license": "MIT",
   "keywords": [
     "multicall",
-    "makerdao"
+    "makerdao",
+    "batch", 
+    "web3",
+    "ethereum"
   ],
-  "homepage": "https://github.com/makerdao/multicall.js#readme",
+  "homepage": "https://github.com/sambacha/multicall.js#readme",
   "bugs": {
-    "url": "https://github.com/makerdao/multicall.js/issues"
+    "url": "https://github.com/sambacha/multicall.js/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/makerdao/multicall.js.git"
+    "url": "https://github.com/sambacha/multicall.js.git"
   },
   "main": "dist/multicall.cjs.js",
   "types": "types/multicall.d.ts",

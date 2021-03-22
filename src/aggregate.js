@@ -1,6 +1,11 @@
 import { id as keccak256 } from 'ethers/utils/hash';
 import invariant from 'invariant';
-import { strip0x, ethCall, encodeParameters, decodeParameters } from './helpers.js';
+import {
+  strip0x,
+  ethCall,
+  encodeParameters,
+  decodeParameters,
+} from './helpers.js';
 import memoize from 'lodash/memoize';
 
 const INSIDE_EVERY_PARENTHESES = /\(.*?\)/g;
@@ -34,7 +39,9 @@ export function _makeMulticallData(calls) {
   return calldata;
 }
 
-const makeMulticallData = memoize(_makeMulticallData, (...args) => JSON.stringify(args));
+const makeMulticallData = memoize(_makeMulticallData, (...args) =>
+  JSON.stringify(args),
+);
 
 export default async function aggregate(calls, config) {
   calls = Array.isArray(calls) ? calls : [calls];
@@ -89,7 +96,10 @@ export default async function aggregate(calls, config) {
     'Missing data needed to parse results',
   );
 
-  const outerResultsDecoded = decodeParameters(['uint256', 'bytes[]'], outerResults);
+  const outerResultsDecoded = decodeParameters(
+    ['uint256', 'bytes[]'],
+    outerResults,
+  );
   const blockNumber = outerResultsDecoded.shift();
   const parsedVals = outerResultsDecoded.reduce((acc, r) => {
     r.forEach((results, idx) => {
@@ -114,7 +124,8 @@ export default async function aggregate(calls, config) {
   for (let i = 0; i < parsedVals.length; i++) {
     const [name, transform] = returnDataMeta[i];
     retObj.original[name] = parsedVals[i];
-    retObj.transformed[name] = transform !== undefined ? transform(parsedVals[i]) : parsedVals[i];
+    retObj.transformed[name] =
+      transform !== undefined ? transform(parsedVals[i]) : parsedVals[i];
   }
 
   return { results: retObj, keyToArgMap };

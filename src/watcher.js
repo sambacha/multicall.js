@@ -77,7 +77,8 @@ export default function createWatcher(model, config) {
       state.ws = new WebSocket(state.config.rpcUrl);
       state.ws.onopen = () => {
         log('WebSocket connected');
-        if (state.handler) throw new Error('Existing poll setTimeout handler set');
+        if (state.handler)
+          throw new Error('Existing poll setTimeout handler set');
         if (state.watching) {
           poll.call({
             state,
@@ -88,12 +89,16 @@ export default function createWatcher(model, config) {
       };
       state.ws.onclose = (err) => {
         log('WebSocket closed: %s', JSON.stringify(err));
-        log(`Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`);
+        log(
+          `Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`,
+        );
         reconnectWebSocket(state.config.wsReconnectTimeout);
       };
       state.ws.onerror = (err) => {
         log('WebSocket error: %s', JSON.stringify(err));
-        log(`Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`);
+        log(
+          `Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`,
+        );
         reconnectWebSocket(state.config.wsReconnectTimeout);
       };
     }
@@ -116,11 +121,13 @@ export default function createWatcher(model, config) {
 
   function subscribe(listener, id, batch = false) {
     if (!isEmpty(state.storeTransformed)) {
-      const events = Object.entries(state.storeTransformed).map(([type, value]) => ({
-        type,
-        value,
-        args: state.keyToArgMap[type] || [],
-      }));
+      const events = Object.entries(state.storeTransformed).map(
+        ([type, value]) => ({
+          type,
+          value,
+          args: state.keyToArgMap[type] || [],
+        }),
+      );
       batch ? listener(events) : events.forEach(listener);
     }
     state.listeners.subscribe.push({ listener, id, batch });
@@ -134,8 +141,13 @@ export default function createWatcher(model, config) {
   }
 
   function poll() {
-    const interval = this.interval !== undefined ? this.interval : this.state.config.interval;
-    log('poll() called, %s%s', 'interval: ' + interval, this.retry ? ', retry: ' + this.retry : '');
+    const interval =
+      this.interval !== undefined ? this.interval : this.state.config.interval;
+    log(
+      'poll() called, %s%s',
+      'interval: ' + interval,
+      this.retry ? ', retry: ' + this.retry : '',
+    );
     this.state.handler = setTimeout(async () => {
       try {
         if (!this.state.handler) return;
@@ -166,9 +178,13 @@ export default function createWatcher(model, config) {
 
         if (this.state.cancelPromiseId === promiseId) return;
 
-        if (typeof this.resolveFetchPromise === 'function') this.resolveFetchPromise();
+        if (typeof this.resolveFetchPromise === 'function')
+          this.resolveFetchPromise();
 
-        if (this.state.latestBlockNumber !== null && blockNumber < this.state.latestBlockNumber) {
+        if (
+          this.state.latestBlockNumber !== null &&
+          blockNumber < this.state.latestBlockNumber
+        ) {
           // Retry if blockNumber is lower than latestBlockNumber
           log(
             `Stale block returned, retrying in ${
@@ -183,13 +199,18 @@ export default function createWatcher(model, config) {
         } else {
           if (
             this.state.latestBlockNumber === null ||
-            (this.state.latestBlockNumber !== null && blockNumber > this.state.latestBlockNumber)
+            (this.state.latestBlockNumber !== null &&
+              blockNumber > this.state.latestBlockNumber)
           ) {
             this.state.latestBlockNumber = parseInt(blockNumber);
-            state.listeners.block.forEach(({ listener }) => listener(this.state.latestBlockNumber));
+            state.listeners.block.forEach(({ listener }) =>
+              listener(this.state.latestBlockNumber),
+            );
           }
           const events = Object.entries(data)
-            .filter(([type, value]) => isNewState(type, value, this.state.store))
+            .filter(([type, value]) =>
+              isNewState(type, value, this.state.store),
+            )
             .map(([type]) => ({
               type,
               value: dataTransformed[type],
@@ -203,10 +224,16 @@ export default function createWatcher(model, config) {
         }
       } catch (err) {
         log('Error: %s', err.message);
-        state.listeners.error.forEach(({ listener }) => listener(err, this.state));
+        state.listeners.error.forEach(({ listener }) =>
+          listener(err, this.state),
+        );
         if (!this.state.handler) return;
         // Retry on error
-        log(`Error occured, retrying in ${this.state.config.errorRetryWait / 1000} seconds`);
+        log(
+          `Error occured, retrying in ${
+            this.state.config.errorRetryWait / 1000
+          } seconds`,
+        );
         poll.call({
           state: this.state,
           interval: this.state.config.errorRetryWait,
@@ -229,7 +256,10 @@ export default function createWatcher(model, config) {
       const fetchPromise = new Promise((resolve) => {
         resolveFetchPromise = resolve;
       });
-      if (state.watching && (!state.ws || state.ws.readyState === WebSocket.OPEN)) {
+      if (
+        state.watching &&
+        (!state.ws || state.ws.readyState === WebSocket.OPEN)
+      ) {
         clearTimeout(state.handler);
         state.handler = null;
         poll.call({ state, interval: 0, resolveFetchPromise });
@@ -242,7 +272,9 @@ export default function createWatcher(model, config) {
       subscribe(listener, id, false);
       return {
         unsub() {
-          state.listeners.subscribe = state.listeners.subscribe.filter(({ id: _id }) => _id !== id);
+          state.listeners.subscribe = state.listeners.subscribe.filter(
+            ({ id: _id }) => _id !== id,
+          );
         },
       };
     },
@@ -267,7 +299,9 @@ export default function createWatcher(model, config) {
       state.listeners.block.push({ listener, id });
       return {
         unsub() {
-          state.listeners.block = state.listeners.block.filter(({ id: _id }) => _id !== id);
+          state.listeners.block = state.listeners.block.filter(
+            ({ id: _id }) => _id !== id,
+          );
         },
       };
     },
@@ -276,7 +310,9 @@ export default function createWatcher(model, config) {
       state.listeners.poll.push({ listener, id });
       return {
         unsub() {
-          state.listeners.poll = state.listeners.poll.filter(({ id: _id }) => _id !== id);
+          state.listeners.poll = state.listeners.poll.filter(
+            ({ id: _id }) => _id !== id,
+          );
         },
       };
     },
@@ -285,7 +321,9 @@ export default function createWatcher(model, config) {
       state.listeners.error.push({ listener, id });
       return {
         unsub() {
-          state.listeners.error = state.listeners.error.filter(({ id: _id }) => _id !== id);
+          state.listeners.error = state.listeners.error.filter(
+            ({ id: _id }) => _id !== id,
+          );
         },
       };
     },

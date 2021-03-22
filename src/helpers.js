@@ -34,14 +34,22 @@ export function padLeft(string, chars, sign) {
   var hasPrefix = /^0x/i.test(string) || typeof string === 'number';
   string = string.toString(16).replace(/^0x/i, '');
   var padding = chars - string.length + 1 >= 0 ? chars - string.length + 1 : 0;
-  return (hasPrefix ? '0x' : '') + new Array(padding).join(sign ? sign : '0') + string;
+  return (
+    (hasPrefix ? '0x' : '') +
+    new Array(padding).join(sign ? sign : '0') +
+    string
+  );
 }
 
 export function padRight(string, chars, sign) {
   var hasPrefix = /^0x/i.test(string) || typeof string === 'number';
   string = string.toString(16).replace(/^0x/i, '');
   var padding = chars - string.length + 1 >= 0 ? chars - string.length + 1 : 0;
-  return (hasPrefix ? '0x' : '') + string + new Array(padding).join(sign ? sign : '0');
+  return (
+    (hasPrefix ? '0x' : '') +
+    string +
+    new Array(padding).join(sign ? sign : '0')
+  );
 }
 
 export function isEmpty(obj) {

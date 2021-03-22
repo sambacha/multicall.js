@@ -76,12 +76,19 @@ export async function ethCall(rawData, { id, web3, rpcUrl, block, multicallAddre
       }));
       function onMessage(data) {
         if (typeof data !== 'string') data = data.data;
-        const json = JSON.parse(data);
+        try {
+          var json = JSON.parse(data);
+        } catch (e) {
+          log('Unexpected WebSocket response %s', data);
+          return;
+        } 
         if (!json.id || json.id !== id) return;
         log('Got WebSocket response id #%d', json.id);
         clearTimeout(timeoutHandle);
         ws.onmessage = null;
-        resolve(json.result);
+        if (json.result) return resolve(json.result);
+        if (json.error) return reject(new Error(json.error.message));
+        reject(new Error(`WebSocket response with empty result`));
       }
       const timeoutHandle = setTimeout(() => {
         if (ws.onmessage !== onMessage) return;

@@ -89,13 +89,17 @@ export default async function aggregate(calls, config) {
   const parsedVals = outerResultsDecoded.reduce((acc, r) => {
     r.forEach((results, idx) => {
       const types = calls[idx].returnTypes;
-      const resultsDecoded = decodeParameters(types, results);
-      acc.push(
-        ...resultsDecoded.map((r, idx) => {
-          if (types[idx] === 'bool') return r.toString() === 'true';
-          return r;
-        })
-      );
+      if (results === '0x') {
+        acc.push(...new Array(types.length).fill(null));
+      } else {
+        const resultsDecoded = decodeParameters(types, results);
+        acc.push(
+          ...resultsDecoded.map((r, idx) => {
+            if (types[idx] === 'bool') return r.toString() === 'true';
+            return r;
+          })
+        );
+      }
     });
     return acc;
   }, []);

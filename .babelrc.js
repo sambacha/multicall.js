@@ -3,10 +3,11 @@ const { NODE_ENV } = process.env;
 module.exports = {
   presets: [
     [
-      '@babel/env',
-      {
+//      '@babel/env',
+      "@babel/preset-env",  
+    {
         targets: {
-          browsers: ['ie >= 11']
+          browsers: ["> 0.25%, not dead"]
         },
         exclude: ['transform-async-to-generator', 'transform-regenerator'],
         modules: false,

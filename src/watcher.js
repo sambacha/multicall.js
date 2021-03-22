@@ -28,7 +28,7 @@ function prepareConfig(config) {
     errorRetryWait: 5000,
     wsResponseTimeout: 5000,
     wsReconnectTimeout: 5000,
-    ...config
+    ...config,
   };
   if (config.preset !== undefined) {
     if (addresses[config.preset] !== undefined) {
@@ -52,13 +52,13 @@ export default function createWatcher(model, config) {
       subscribe: [],
       block: [],
       poll: [],
-      error: []
+      error: [],
     },
     handler: null,
     wsReconnectHandler: null,
     watching: false,
     config: prepareConfig(config),
-    ws: null
+    ws: null,
   };
 
   function reconnectWebSocket(timeout) {
@@ -82,16 +82,16 @@ export default function createWatcher(model, config) {
           poll.call({
             state,
             interval: 0,
-            resolveFetchPromise: state.initialFetchResolver
+            resolveFetchPromise: state.initialFetchResolver,
           });
         }
       };
-      state.ws.onclose = err => {
+      state.ws.onclose = (err) => {
         log('WebSocket closed: %s', JSON.stringify(err));
         log(`Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`);
         reconnectWebSocket(state.config.wsReconnectTimeout);
       };
-      state.ws.onerror = err => {
+      state.ws.onerror = (err) => {
         log('WebSocket error: %s', JSON.stringify(err));
         log(`Reconnecting in ${state.config.wsReconnectTimeout / 1000} seconds.`);
         reconnectWebSocket(state.config.wsReconnectTimeout);
@@ -110,7 +110,7 @@ export default function createWatcher(model, config) {
 
   setupWebSocket();
 
-  state.initialFetchPromise = new Promise(resolve => {
+  state.initialFetchPromise = new Promise((resolve) => {
     state.initialFetchResolver = resolve;
   });
 
@@ -119,7 +119,7 @@ export default function createWatcher(model, config) {
       const events = Object.entries(state.storeTransformed).map(([type, value]) => ({
         type,
         value,
-        args: state.keyToArgMap[type] || []
+        args: state.keyToArgMap[type] || [],
       }));
       batch ? listener(events) : events.forEach(listener);
     }
@@ -129,7 +129,7 @@ export default function createWatcher(model, config) {
   function alertListeners(events) {
     if (!isEmpty(events))
       state.listeners.subscribe.forEach(({ listener, batch }) =>
-        batch ? listener(events) : events.forEach(listener)
+        batch ? listener(events) : events.forEach(listener),
       );
   }
 
@@ -147,21 +147,21 @@ export default function createWatcher(model, config) {
           listener({
             id: promiseId,
             latestBlockNumber: this.state.latestBlockNumber,
-            ...(this.retry ? { retry: this.retry } : {})
-          })
+            ...(this.retry ? { retry: this.retry } : {}),
+          }),
         );
 
         const {
           results: {
             blockNumber,
             original: { ...data },
-            transformed: { ...dataTransformed }
+            transformed: { ...dataTransformed },
           },
-          keyToArgMap
+          keyToArgMap,
         } = await aggregate(this.state.model, {
           ...this.state.config,
           ws: this.state.ws,
-          id: this.state.latestPromiseId
+          id: this.state.latestPromiseId,
         });
 
         if (this.state.cancelPromiseId === promiseId) return;
@@ -171,13 +171,14 @@ export default function createWatcher(model, config) {
         if (this.state.latestBlockNumber !== null && blockNumber < this.state.latestBlockNumber) {
           // Retry if blockNumber is lower than latestBlockNumber
           log(
-            `Stale block returned, retrying in ${this.state.config.staleBlockRetryWait /
-              1000} seconds`
+            `Stale block returned, retrying in ${
+              this.state.config.staleBlockRetryWait / 1000
+            } seconds`,
           );
           poll.call({
             state: this.state,
             interval: this.state.config.staleBlockRetryWait,
-            retry: this.retry ? this.retry + 1 : 1
+            retry: this.retry ? this.retry + 1 : 1,
           });
         } else {
           if (
@@ -192,7 +193,7 @@ export default function createWatcher(model, config) {
             .map(([type]) => ({
               type,
               value: dataTransformed[type],
-              args: keyToArgMap[type] || []
+              args: keyToArgMap[type] || [],
             }));
           this.state.store = { ...data };
           this.state.storeTransformed = { ...dataTransformed };
@@ -209,7 +210,7 @@ export default function createWatcher(model, config) {
         poll.call({
           state: this.state,
           interval: this.state.config.errorRetryWait,
-          retry: this.retry ? this.retry + 1 : 1
+          retry: this.retry ? this.retry + 1 : 1,
         });
       }
     }, interval);
@@ -225,7 +226,7 @@ export default function createWatcher(model, config) {
     poll() {
       log('watcher.poll() called');
       let resolveFetchPromise;
-      const fetchPromise = new Promise(resolve => {
+      const fetchPromise = new Promise((resolve) => {
         resolveFetchPromise = resolve;
       });
       if (state.watching && (!state.ws || state.ws.readyState === WebSocket.OPEN)) {
@@ -242,7 +243,7 @@ export default function createWatcher(model, config) {
       return {
         unsub() {
           state.listeners.subscribe = state.listeners.subscribe.filter(({ id: _id }) => _id !== id);
-        }
+        },
       };
     },
     batch() {
@@ -252,10 +253,12 @@ export default function createWatcher(model, config) {
           subscribe(listener, id, true);
           return {
             unsub() {
-              state.listeners.subscribe = state.listeners.subscribe.filter(({ id: _id }) => _id !== id);
-            }
+              state.listeners.subscribe = state.listeners.subscribe.filter(
+                ({ id: _id }) => _id !== id,
+              );
+            },
           };
-        }
+        },
       };
     },
     onNewBlock(listener) {
@@ -265,7 +268,7 @@ export default function createWatcher(model, config) {
       return {
         unsub() {
           state.listeners.block = state.listeners.block.filter(({ id: _id }) => _id !== id);
-        }
+        },
       };
     },
     onPoll(listener) {
@@ -274,7 +277,7 @@ export default function createWatcher(model, config) {
       return {
         unsub() {
           state.listeners.poll = state.listeners.poll.filter(({ id: _id }) => _id !== id);
-        }
+        },
       };
     },
     onError(listener) {
@@ -283,7 +286,7 @@ export default function createWatcher(model, config) {
       return {
         unsub() {
           state.listeners.error = state.listeners.error.filter(({ id: _id }) => _id !== id);
-        }
+        },
       };
     },
     start() {
@@ -293,7 +296,7 @@ export default function createWatcher(model, config) {
         poll.call({
           state,
           interval: 0,
-          resolveFetchPromise: state.initialFetchResolver
+          resolveFetchPromise: state.initialFetchResolver,
         });
       }
       return state.initialFetchPromise;
@@ -323,13 +326,13 @@ export default function createWatcher(model, config) {
       setupWebSocket();
       if (state.watching && !state.ws) {
         let resolveFetchPromise;
-        const fetchPromise = new Promise(resolve => {
+        const fetchPromise = new Promise((resolve) => {
           resolveFetchPromise = resolve;
         });
         poll.call({
           state,
           interval: 0,
-          resolveFetchPromise
+          resolveFetchPromise,
         });
         return fetchPromise;
       }
@@ -343,7 +346,7 @@ export default function createWatcher(model, config) {
     },
     get schemas() {
       return state.model;
-    }
+    },
   };
 
   return watcher;

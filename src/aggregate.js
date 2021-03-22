@@ -12,19 +12,24 @@ export function _makeMulticallData(calls) {
       target,
       keccak256(method).substr(0, 10) +
         (args && args.length > 0
-          ? strip0x(encodeParameters(args.map(a => a[1]), args.map(a => a[0])))
-          : '')
-    ])
+          ? strip0x(
+              encodeParameters(
+                args.map((a) => a[1]),
+                args.map((a) => a[0]),
+              ),
+            )
+          : ''),
+    ]),
   ];
   const calldata = encodeParameters(
     [
       {
         components: [{ type: 'address' }, { type: 'bytes' }],
         name: 'data',
-        type: 'tuple[]'
-      }
+        type: 'tuple[]',
+      },
     ],
-    values
+    values,
   );
   return calldata;
 }
@@ -50,14 +55,14 @@ export default async function aggregate(calls, config) {
     const [method, ...argValues] = call;
     const [argTypesString, returnTypesString] = method
       .match(INSIDE_EVERY_PARENTHESES)
-      .map(match => match.slice(1, -1));
-    const argTypes = argTypesString.split(',').filter(e => !!e);
+      .map((match) => match.slice(1, -1));
+    const argTypes = argTypesString.split(',').filter((e) => !!e);
     invariant(
       argTypes.length === argValues.length,
       `Every method argument must have exactly one type.
           Comparing argument types ${JSON.stringify(argTypes)}
           to argument values ${JSON.stringify(argValues)}.
-        `
+        `,
     );
     const args = argValues.map((argValue, idx) => [argValue, argTypes[idx]]);
     const returnTypes = !!returnTypesString ? returnTypesString.split(',') : [];
@@ -66,7 +71,7 @@ export default async function aggregate(calls, config) {
       args,
       returnTypes,
       target,
-      returns
+      returns,
     };
   });
 
@@ -81,7 +86,7 @@ export default async function aggregate(calls, config) {
 
   invariant(
     returnTypeArray.length === returnDataMeta.length,
-    'Missing data needed to parse results'
+    'Missing data needed to parse results',
   );
 
   const outerResultsDecoded = decodeParameters(['uint256', 'bytes[]'], outerResults);
@@ -97,7 +102,7 @@ export default async function aggregate(calls, config) {
           ...resultsDecoded.map((r, idx) => {
             if (types[idx] === 'bool') return r.toString() === 'true';
             return r;
-          })
+          }),
         );
       }
     });
